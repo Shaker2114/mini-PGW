@@ -11,6 +11,7 @@ Makefile
 
 pgw_server
 *.out
+*.log
 
 .vscode/
 .idea/
