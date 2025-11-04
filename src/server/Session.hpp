@@ -7,11 +7,14 @@ namespace pgw_server
     class Session
     {
     public:
-        // bool is_lifetime() {
-        //    return (current_time - start_time) <= timeout;
-        // }
+        Session(const std::string& imsi);
+
+        std::string getIMSI() const;
+        std::chrono::steady_clock::time_point getStartTime() const;
+
+        bool isExpired(int timeout) const;
     private:
-        // int timeout; - время длительности сессии
-        // std::chrono... start_time - время начала сессии
+        std::string _imsi;
+        std::chrono::steady_clock::time_point _start_time;
     };
 }
