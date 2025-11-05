@@ -1,15 +1,17 @@
 #pragma once
 
 #include "Session.hpp"
+#include "CDRWriter.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
+
 namespace pgw_server
 {
     class SessionManager
     {
     public:
-        SessionManager(int timeout_sec);
+        SessionManager(int timeout_sec, const std::string& log_filename);
 
         bool createSession(const std::string& imsi);
         bool removeSession(const std::string& imsi);
@@ -26,6 +28,7 @@ namespace pgw_server
     private:
         std::unordered_map<std::string, std::unique_ptr<Session>> _sessions;
         std::unordered_set<std::string> _black_list;
+        CDRWriter _cdr_writer;
         int _timeout_sec;
         // mutable std::mutex _mutex;
     };
