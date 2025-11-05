@@ -42,7 +42,27 @@ target_include_directories(cpp-httplib-interface INTERFACE
     ${cpp-httplib_SOURCE_DIR}
 )
 
-add_executable(pgw_server src/testfile.cpp)
+set(COMMON_SOURCES
+    src/common/Logger.cpp
+    src/common/Config.cpp  
+    src/common/Socket.cpp
+)
+
+set(COMMON_HEADERS
+    src/common/Logger.hpp
+    src/common/Config.hpp  
+    src/common/Socket.hpp
+)
+
+# add_executable(pgw_server
+#     src/server/main_server.cpp
+#     src/server/UDPServer.cpp
+#     src/server/HTTPServer.cpp
+#     src/server/SessionManager.cpp
+#     ${COMMON_SOURCES} - common files
+# )
+
+add_executable(pgw_server src/server/testfile.cpp)
 target_link_libraries(pgw_server PRIVATE
     nlohmann_json::nlohmann_json
     cpp-httplib-interface
@@ -54,6 +74,14 @@ target_include_directories(pgw_server PRIVATE
     ${googletest_SOURCE_DIR}/googletest/include
     ${spdlog_SOURCE_DIR}/include
 )
+
+# same for client
+
+# add_executable(pgw_client
+#     src/client/main_client.cpp
+#     src/client/UDPClient.cpp
+#     ${COMMON_SOURCES}          # ← Подключаем общие файлы!
+# )
 
 # enable_testing()
 

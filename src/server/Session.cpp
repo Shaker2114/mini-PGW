@@ -17,8 +17,8 @@ namespace pgw_server
     bool Session::isExpired(int timeout) const
     {
         auto current_time = std::chrono::steady_clock::now();
-        auto time_from_start = std::chrono::steady_clock::duration(current_time - _start_time);
-        
-        return time_from_start > static_cast<float>(timeout);
+        auto time_from_session_start = std::chrono::duration_cast<std::chrono::seconds>(current_time - _start_time);
+
+        return time_from_session_start >= std::chrono::seconds(timeout);
     }
 }
