@@ -1,6 +1,6 @@
 #include "HTTPServer.hpp"
 
-namespace pgw_serv
+namespace pgw_server
 {
     HTTPServer::HTTPServer(spdlog::logger* Logger)
         : _logger(Logger)

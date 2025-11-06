@@ -15,12 +15,12 @@ namespace pgw_server
         auto time_in_seconds = std::chrono::time_point_cast<std::chrono::seconds>(current_time_point); // in seconds
         std::string timestamp = std::format("{:%d-%m-%Y %H:%M:%S}", time_in_seconds);
         
-        std::ifstream cdr_file(_filename, std::ios::app);
+        std::ofstream cdr_file(_filename, std::ios::app);
         
         if (cdr_file.is_open()) {
             std::string cdr_string = timestamp + ", " + imsi + ", " + action + "\n";
             
-            cdr_file >> cdr_string;
+            cdr_file << cdr_string;
             
             cdr_file.close();
         }
