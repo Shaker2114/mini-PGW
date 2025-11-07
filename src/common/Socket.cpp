@@ -17,16 +17,19 @@ namespace pgw_common
         }
         
         try {
-            sockaddr_in addr;
+            sockaddr_in addr{};
             addr.sin_family = AF_INET;
             addr.sin_port = htons(port);
-            addr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
+
+            if (inet_pton(AF_INET, ip_addr.c_str(), &addr.sin_addr) <= 0) {
+                throw std::runtime_error("Invalid IP address: " + ip_addr);
+            }
             
-            if (bind(socket_id, (sockaddr*)(&addr), sizeof(addr)) < 0) {
+            if (bind(socket_id, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
                 throw std::runtime_error("bind() failed on " + ip_addr + ":" + std::to_string(port));
             }
 
-            return std::unique_ptr<Socket>(new Socket(socket_id, addr));
+            return std::make_unique<Socket>(socket_id, addr);
         } catch(const std::exception& ex) {
             close(socket_id);
             throw std::runtime_error("Failed to initialize socket: " + std::string(ex.what()));

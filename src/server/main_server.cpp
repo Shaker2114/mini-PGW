@@ -1,5 +1,7 @@
+#include "PGWServer.hpp"
 
-// int main()
-// {
-    // возможно тут надо будет распараллеливать код.
-// }
+int main()
+{
+    pgw_server::PGWServer main_server;
+    main_server.start();
+}

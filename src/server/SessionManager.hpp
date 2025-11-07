@@ -16,10 +16,10 @@ namespace pgw_server
         bool createSession(const std::string& imsi);
         bool removeSession(const std::string& imsi);
         bool hasSession(const std::string& imsi) const;
-        
+
         void checkExpiredSessions();
 
-        void addToBackList(const std::string& imsi);
+        void setBlacklist(const std::vector<std::string>& blacklist);
         bool isBlackListed(const std::string& imsi) const;
 
         void shutdownSessions(int graceful_shutdown_rate);

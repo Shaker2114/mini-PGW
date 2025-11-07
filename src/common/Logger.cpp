@@ -1,7 +1,7 @@
 #include "Logger.hpp"
 
 #include <spdlog/sinks/basic_file_sink.h>
-// #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace pgw_common
 {
@@ -11,12 +11,18 @@ namespace pgw_common
         const std::string& log_level)
     {
         try {
-            spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file.c_str(), true);
-                
-            auto _logger = std::make_shared<spdlog::logger>(name, file_sink);
+            // spdlog::sink_ptr console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            // spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file.c_str(), true);
+            
+            std::vector<spdlog::sink_ptr> sinks;
+            sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>()); // console_sink
+            sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file.c_str(), true)); // file_sink
+
+            auto _logger = std::make_shared<spdlog::logger>(name, sinks.begin(), sinks.end());
             
             _logger->set_level(getLevelFromString(log_level));
-            
+            _logger->set_pattern("[%d-%m-%Y %H:%M:%S] [%n] [%l] %v");
+
             _logger->info("{}_logger initialized with level: {}", name, log_level);
 
             return _logger;
@@ -28,11 +34,11 @@ namespace pgw_common
     }
     spdlog::level::level_enum Logger::getLevelFromString(const std::string& level)
     {
-        if (level == "DEBUG") return spdlog::level::debug;
-        if (level == "INFO") return spdlog::level::info;
-        if (level == "WARN") return spdlog::level::warn;
-        if (level == "ERR") return spdlog::level::err;
-        if (level == "CRITICAL") return spdlog::level::critical;
+        if (level == "DEBUG" || level == "debug") return spdlog::level::debug;
+        if (level == "INFO" || level == "info") return spdlog::level::info;
+        if (level == "WARN" || level == "warn") return spdlog::level::warn;
+        if (level == "ERR" || level == "err") return spdlog::level::err;
+        if (level == "CRITICAL" || level == "critical") return spdlog::level::critical;
 
         return spdlog::level::info;
     }

@@ -1,5 +1,7 @@
 #include "SessionManager.hpp"
 
+#include <vector>
+
 namespace pgw_server
 {
     SessionManager::SessionManager(int timeout_sec, const std::string& log_filename)
@@ -17,12 +19,7 @@ namespace pgw_server
     }
     bool SessionManager::removeSession(const std::string& imsi)
     {
-        if (hasSession(imsi)) {
-            auto erase_result = _sessions.erase(imsi);
-            return static_cast<bool>(erase_result);
-        }
-
-        return false;
+        return _sessions.erase(imsi) > 0;
     }
     bool SessionManager::hasSession(const std::string& imsi) const
     {
@@ -31,18 +28,25 @@ namespace pgw_server
 
     void SessionManager::checkExpiredSessions()
     {
-        for (auto& session : _sessions) {
-            if (session.second->isExpired(_timeout_sec)) {
-                _cdr_writer.write(session.first, "session_timeout");
-                removeSession(session.first);
+        std::vector<std::string> expired_imsis;
+
+        for (const auto& [imsi, session] : _sessions) {
+            if (session->isExpired(_timeout_sec)) {
+                expired_imsis.push_back(imsi);
             }
+        }
+
+        for (const auto& imsi : expired_imsis) {
+            _cdr_writer.write(imsi, "session_timeout");
+            removeSession(imsi);
         }
     }
 
-    void SessionManager::addToBackList(const std::string& imsi)
+    void SessionManager::setBlacklist(const std::vector<std::string>& blacklist)
     {
-        _black_list.insert(imsi);
+        _black_list.insert(blacklist.begin(), blacklist.end());
     }
+
     bool SessionManager::isBlackListed(const std::string& imsi) const
     {
         return _black_list.contains(imsi);
@@ -50,10 +54,19 @@ namespace pgw_server
 
     void SessionManager::shutdownSessions(int graceful_shutdown_rate)
     {
-        for (int i = 0; i < graceful_shutdown_rate && _sessions.size() != 0; ++i) {
-            auto session_to_remove = _sessions.begin();
-            _cdr_writer.write(session_to_remove->first, "session_ended");
-            removeSession(session_to_remove->first);
+        if (graceful_shutdown_rate <= 0) return;
+
+        std::vector<std::string> sessions_to_remove;
+        
+        for (auto it = _sessions.begin();
+            it != _sessions.end() && sessions_to_remove.size() < graceful_shutdown_rate; 
+            ++it) {
+            sessions_to_remove.push_back(it->first);
+        }
+        
+        for (const auto& imsi : sessions_to_remove) {
+            _cdr_writer.write(imsi, "session_ended");
+            removeSession(imsi);
         }
     }
 
