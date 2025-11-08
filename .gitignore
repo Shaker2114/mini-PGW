@@ -10,6 +10,7 @@ Makefile
 *.cmake
 
 pgw_server
+pgw_client
 *.out
 *.log
 
