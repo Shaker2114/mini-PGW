@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
-project(PGW_Server)
+project(miniPGW)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# std::format
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFMT_HEADER_ONLY")
 
 include(FetchContent)
 
@@ -36,52 +39,70 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(nlohmann_json cpp-httplib googletest spdlog)
 
+# Common lib
+add_library(pgw_common STATIC
+    src/common/BCDConverter.cpp
+    src/common/Config.cpp
+    src/common/Logger.cpp
+    src/common/Socket.cpp
+)
+
+target_include_directories(pgw_common PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
+)
+
+target_link_libraries(pgw_common PUBLIC
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+)
+
+# pgw_server
+add_executable(pgw_server
+    src/server/main_server.cpp
+    src/server/PGWServer.cpp
+    src/server/UDPServer.cpp
+    src/server/HTTPServer.cpp
+    src/server/SessionManager.cpp
+    src/server/Session.cpp
+    src/server/CDRWriter.cpp
+)
+
 # Interface lib for cpp-httplib
 add_library(cpp-httplib-interface INTERFACE)
 target_include_directories(cpp-httplib-interface INTERFACE 
     ${cpp-httplib_SOURCE_DIR}
 )
 
-set(COMMON_SOURCES
-    src/common/Logger.cpp
-    src/common/Config.cpp  
-    src/common/Socket.cpp
-)
-
-set(COMMON_HEADERS
-    src/common/Logger.hpp
-    src/common/Config.hpp  
-    src/common/Socket.hpp
-)
-
-# add_executable(pgw_server
-#     src/server/main_server.cpp
-#     src/server/UDPServer.cpp
-#     src/server/HTTPServer.cpp
-#     src/server/SessionManager.cpp
-#     ${COMMON_SOURCES} - common files
-# )
-
-add_executable(pgw_server src/server/testfile.cpp)
-target_link_libraries(pgw_server PRIVATE
-    nlohmann_json::nlohmann_json
-    cpp-httplib-interface
-    spdlog::spdlog
-)
 target_include_directories(pgw_server PRIVATE
-    ${nlohmann_json_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/server
+    #${nlohmann_json_SOURCE_DIR}/include
     ${cpp-httplib_SOURCE_DIR}
-    ${googletest_SOURCE_DIR}/googletest/include
-    ${spdlog_SOURCE_DIR}/include
+    #${googletest_SOURCE_DIR}/googletest/include
+    #${spdlog_SOURCE_DIR}/include
 )
 
-# same for client
+target_link_libraries(pgw_server PRIVATE
+    pgw_common
+    #nlohmann_json::nlohmann_json
+    cpp-httplib-interface
+    #spdlog::spdlog
+    pthread
+)
 
-# add_executable(pgw_client
-#     src/client/main_client.cpp
-#     src/client/UDPClient.cpp
-#     ${COMMON_SOURCES}          # ← Подключаем общие файлы!
-# )
+# Client исполняемый файл (заглушка - нужно будет реализовать)
+add_executable(pgw_client
+    src/client/main_client.cpp
+    src/client/UDPClient.cpp
+)
+
+target_include_directories(pgw_client PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/client
+)
+
+target_link_libraries(pgw_client PRIVATE
+    pgw_common
+    pthread
+)
 
 # enable_testing()
 

@@ -6,16 +6,20 @@
 #include <httplib.h>
 #include <spdlog/spdlog.h>
 #include <thread>
-// #include <functional>
+#include <functional>
 
 namespace pgw_server
 {
     class HTTPServer
     {
+    private:
+        using checkSubscriberHandler = std::function<bool(const std::string&)>;
+        using stopHandler = std::function<void()>;
     public:
         HTTPServer(const std::shared_ptr<spdlog::logger>& _logger, 
-            const std::shared_ptr<SessionManager>& sesManager,
-            int port);
+            int port,
+            checkSubscriberHandler check_handler,
+            stopHandler stop_handler);
         
         void start();
         void stop();
@@ -25,8 +29,10 @@ namespace pgw_server
 
         httplib::Server _http_svr;
         std::shared_ptr<spdlog::logger> _svr_logger;
-        std::shared_ptr<SessionManager> _sesManager;
         int _port;
         std::thread _http_svr_thread;
+
+        checkSubscriberHandler _check_handler;
+        stopHandler _stop_handler;
     };
 }
