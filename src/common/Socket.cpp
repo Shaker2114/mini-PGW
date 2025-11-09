@@ -8,14 +8,22 @@
 
 namespace pgw_common
 {
-    std::unique_ptr<Socket> Socket::socket_init(const std::string& ip_addr, int port)
+    std::unique_ptr<Socket> Socket::socket_init(
+        const std::string& entityName,
+        const std::string& ip_addr,
+        int port)
     {
+        if (entityName != "Client" && entityName != "Server" &&
+            entityName != "client" && entityName != "server") {
+            throw std::runtime_error("Unknown entity to init socket for");
+        }
+
         int socket_id = socket(AF_INET, SOCK_DGRAM, 0);
 
         if (socket_id < 0) {
             throw std::runtime_error("Failed to create socket with socket()");
         }
-        
+
         try {
             sockaddr_in addr{};
             addr.sin_family = AF_INET;
@@ -24,9 +32,16 @@ namespace pgw_common
             if (inet_pton(AF_INET, ip_addr.c_str(), &addr.sin_addr) <= 0) {
                 throw std::runtime_error("Invalid IP address: " + ip_addr);
             }
-            
+            // not need bind() for client
+            if (entityName == "Client" || entityName == "client") {
+                return std::unique_ptr<Socket>(new Socket(socket_id, addr));
+            }
+            // if its server's socket
             if (bind(socket_id, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
-                throw std::runtime_error("bind() failed on " + ip_addr + ":" + std::to_string(port));
+                throw std::runtime_error(
+                    "bind() failed on " + ip_addr + ":" + std::to_string(port) + 
+                    ": " + strerror(errno)
+                );
             }
 
             return std::unique_ptr<Socket>(new Socket(socket_id, addr));

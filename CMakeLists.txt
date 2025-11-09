@@ -75,21 +75,16 @@ target_include_directories(cpp-httplib-interface INTERFACE
 
 target_include_directories(pgw_server PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/server
-    #${nlohmann_json_SOURCE_DIR}/include
     ${cpp-httplib_SOURCE_DIR}
     #${googletest_SOURCE_DIR}/googletest/include
-    #${spdlog_SOURCE_DIR}/include
 )
 
 target_link_libraries(pgw_server PRIVATE
     pgw_common
-    #nlohmann_json::nlohmann_json
     cpp-httplib-interface
-    #spdlog::spdlog
     pthread
 )
 
-# Client исполняемый файл (заглушка - нужно будет реализовать)
 add_executable(pgw_client
     src/client/main_client.cpp
     src/client/UDPClient.cpp

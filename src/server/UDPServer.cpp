@@ -14,7 +14,11 @@ namespace pgw_server
         try {
             _logger->info("Attempt to create UDP_server");
             
-            auto udp_socket = pgw_common::Socket::socket_init(config_json.udp_ip, config_json.udp_port); // ex
+            auto udp_socket = pgw_common::Socket::socket_init(
+                "Server",
+                config_json.udp_ip,
+                config_json.udp_port
+            ); // ex
             _logger->info("UDP socket created");
 
             return std::unique_ptr<UDPServer>(new UDPServer(
@@ -68,8 +72,14 @@ namespace pgw_server
             sockaddr_in client_addr;
             socklen_t len = sizeof(client_addr);
 
-            int number_of_bytes_read = recvfrom(_udp_socket->getSocketId(), (char *)bcd_buffer,
-                99, 0, reinterpret_cast<sockaddr*>(&client_addr), &len);
+            int number_of_bytes_read = recvfrom(
+                _udp_socket->getSocketId(),
+                reinterpret_cast<char*>(bcd_buffer),
+                sizeof(bcd_buffer) - 1,
+                0,
+                reinterpret_cast<sockaddr*>(&client_addr),
+                &len
+            );
 
             if (number_of_bytes_read < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -99,13 +109,23 @@ namespace pgw_server
                     response = "rejected";
                 }
 
-                ssize_t sent = sendto(_udp_socket->getSocketId(), response.c_str(), response.length(),
-                    MSG_CONFIRM, reinterpret_cast<const sockaddr*>(&client_addr), len);
+                ssize_t sent = sendto(
+                    _udp_socket->getSocketId(),
+                    response.c_str(),
+                    response.length(),
+                    0,
+                    reinterpret_cast<const sockaddr*>(&client_addr),
+                    len
+                );
 
                 if (sent < 0) {
                     _svr_logger->warn("Failed to send response to client: {}", strerror(errno));
                 } else {
-                    _svr_logger->info("Response: {} sent to client with imsi={}", response, imsi);
+                    _svr_logger->info(
+                        "Response: '{}' sent to client with imsi={}",
+                        response,
+                        imsi
+                    );
                 }
 
             } catch(const std::invalid_argument& ex) {

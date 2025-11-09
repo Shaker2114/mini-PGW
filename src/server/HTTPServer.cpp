@@ -48,8 +48,6 @@ namespace pgw_server
         if (_http_svr_thread.joinable()) {
             _http_svr_thread.join();
         }
-
-        _svr_logger->info("The HTTP server has stopped");
     }
     void HTTPServer::run()
     {
@@ -62,6 +60,6 @@ namespace pgw_server
             _svr_logger->critical("HTTP Server crashed: {}", ex.what());
         }
 
-        _svr_logger->info("HTTP server thread has ended");
+        _svr_logger->info("The HTTP server has stopped");
     }
 }

@@ -1,5 +1,41 @@
+#include "UDPClient.hpp"
+#include <csignal>
 
+namespace {
+    pgw_client::UDPClient* g_pgw_client = nullptr;
+}
 
-int main(int argc, char* argv[]) {
-    
+void signal_handler(int signal) {
+    if (g_pgw_client) {
+        spdlog::info("Received signal {}, client shutdown...", signal);
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    try {
+        if (argc != 2) {
+            throw std::runtime_error("There should be only 1 additional command line argument");
+        }
+
+        pgw_client::UDPClient client(argv[1]);
+
+        // signal handler
+        g_pgw_client = &client;
+        std::signal(SIGINT, signal_handler);
+        std::signal(SIGTERM, signal_handler);
+
+        spdlog::info("Starting Client application...");
+        client.configure();
+        client.serverInteraction();
+        spdlog::info("Client application finished successfully");
+        return 0;
+
+    } catch(const std::exception& ex) {
+        spdlog::critical("Client application failed: {}", ex.what());
+        return 1;
+    } catch(...) {
+        spdlog::critical("Client application failed with unknown exception");
+        return 1;
+    }
 }

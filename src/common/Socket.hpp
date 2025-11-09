@@ -9,7 +9,11 @@ namespace pgw_common
     class Socket
     {
     public:
-        static std::unique_ptr<Socket> socket_init(const std::string& ip_addr, int port);
+        static std::unique_ptr<Socket> socket_init(
+            const std::string& entityName,
+            const std::string& ip_addr,
+            int port
+        );
         
         ~Socket();
 
