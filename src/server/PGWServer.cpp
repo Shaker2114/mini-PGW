@@ -21,14 +21,19 @@ namespace pgw_server
                 _svr_config_json.log_file,
                 _svr_config_json.log_level
             ); // ex
+            _svr_logger->info("==========The PGW Server Application is running==========");
+            _svr_logger->info(
+                "Server logger initialized with level: {}",
+                _svr_config_json.log_level
+            );
 
             // sessionManager
             _sesManager = std::make_shared<SessionManager>(
                 _svr_config_json.session_timeout_sec,
-                _svr_config_json.cdr_file
+                _svr_config_json.cdr_file,
+                _svr_logger
             ); // ex
-            _sesManager->setBlacklist(_svr_config_json.blacklist); 
-            _svr_logger->info("SessionManager created");
+            _sesManager->setBlacklist(_svr_config_json.blacklist);
 
             // UDP server
             _udp_svr = UDPServer::UDP_server_init(
@@ -85,10 +90,11 @@ namespace pgw_server
             _sesManager->checkExpiredSessions();
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        // waiting to gracefulShutdown in other thread end
+        // waiting to gracefulShutdown end in other thread
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         _svr_logger->info("The PGW Server has stopped");
+        _svr_logger->info("=====The PGW Server application finished successfully=====");
     }
     
     void PGWServer::gracefulShutdown()

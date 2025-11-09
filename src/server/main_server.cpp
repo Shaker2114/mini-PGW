@@ -22,17 +22,14 @@ int main()
         std::signal(SIGINT, signal_handler);
         std::signal(SIGTERM, signal_handler);
         
-        spdlog::info("Starting PGW Server application...");
         main_server.run();
-        
-        spdlog::info("PGW Server application finished successfully");
         return 0;
 
     } catch (const std::exception& ex) {
-        spdlog::critical("PGW Server application failed: {}", ex.what());
+        spdlog::critical("The PGW Server application failed: {}", ex.what());
         return 1;
     } catch (...) {
-        spdlog::critical("PGW Server application failed with unknown exception");
+        spdlog::critical("The PGW Server application failed with unknown exception");
         return 1;
     }
 }

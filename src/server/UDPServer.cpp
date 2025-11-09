@@ -99,15 +99,7 @@ namespace pgw_server
                 std::string imsi = pgw_common::BCDConverter::bcd_to_imsi(bcd_data); // ex
                 _svr_logger->info("client request received: {}", imsi);
 
-                std::string response;
-                if (_sesManager->createSession(imsi)) {
-                    _svr_logger->info("Session with imsi={} created", imsi);
-                    response = "created";
-                }
-                else {
-                    _svr_logger->info("Failed to create session with imsi={}", imsi);
-                    response = "rejected";
-                }
+                std::string response = (_sesManager->createSession(imsi)) ? "created" : "rejected";
 
                 ssize_t sent = sendto(
                     _udp_socket->getSocketId(),

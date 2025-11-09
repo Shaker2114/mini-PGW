@@ -11,17 +11,21 @@ namespace pgw_common
         const std::string& log_level)
     {
         try {
+            // log files will be placed in log/ directory
+            std::string log_file_path = "log/" + log_file;
+
             std::vector<spdlog::sink_ptr> sinks;
             sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>()); // console_sink
-            sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file.c_str(), false)); // file_sink
+            sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+                log_file_path.c_str(),
+                false
+            )); // file_sink
 
             auto _logger = std::make_shared<spdlog::logger>(name, sinks.begin(), sinks.end());
             
             _logger->set_level(getLevelFromString(log_level));
             _logger->flush_on(getLevelFromString(log_level));
             _logger->set_pattern("[%d-%m-%Y %H:%M:%S] [%n] [%l] %v");
-
-            _logger->info("{} logger initialized with level: {}", name, log_level);
 
             return _logger;
         } catch (const std::bad_alloc& ex) {

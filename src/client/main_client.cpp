@@ -25,17 +25,15 @@ int main(int argc, char* argv[])
         std::signal(SIGINT, signal_handler);
         std::signal(SIGTERM, signal_handler);
 
-        spdlog::info("Starting Client application...");
         client.configure();
         client.serverInteraction();
-        spdlog::info("Client application finished successfully");
         return 0;
 
     } catch(const std::exception& ex) {
-        spdlog::critical("Client application failed: {}", ex.what());
+        spdlog::critical("The Client application failed: {}", ex.what());
         return 1;
     } catch(...) {
-        spdlog::critical("Client application failed with unknown exception");
+        spdlog::critical("The Client application failed with unknown exception");
         return 1;
     }
 }

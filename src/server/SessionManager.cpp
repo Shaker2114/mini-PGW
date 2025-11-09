@@ -4,22 +4,45 @@
 
 namespace pgw_server
 {
-    SessionManager::SessionManager(int timeout_sec, const std::string& log_filename)
-        : _timeout_sec(timeout_sec), _cdr_writer(log_filename) {}
+    SessionManager::SessionManager(
+        int timeout_sec,
+        const std::string& log_filename,
+        const std::shared_ptr<spdlog::logger>& _logger)
+        : _timeout_sec(timeout_sec), _cdr_writer(log_filename),
+        _svr_logger(_logger) {
+            _svr_logger->info("SessionManager created");
+        }
 
     bool SessionManager::createSession(const std::string& imsi)
     {
         if (!hasSession(imsi) && !isBlackListed(imsi)) {
             auto emplace_result = _sessions.try_emplace(imsi, std::make_unique<Session>(imsi));
+            
             _cdr_writer.write(imsi, "session_created");
+            _svr_logger->info("Session with IMSI={} created", imsi);
+            
             return emplace_result.second;
         }
 
+        std::string reason_of_creation_failed = (isBlackListed(imsi)) ?
+            "Session's IMSI Blacklisted" :
+            "Session already exist";
+        
+        _svr_logger->info(
+            "Session with IMSI={} rejected: {}",
+            imsi,
+            reason_of_creation_failed
+        );
         return false;
     }
     bool SessionManager::removeSession(const std::string& imsi)
     {
-        return _sessions.erase(imsi) > 0;
+        if (_sessions.erase(imsi) > 0) {
+            _svr_logger->info("Session with IMSI={} removed", imsi);
+            return true;
+        }
+
+        return false;
     }
     bool SessionManager::hasSession(const std::string& imsi) const
     {

@@ -17,6 +17,11 @@ namespace pgw_client
                 _client_config_json.log_file,
                 _client_config_json.log_level
             ); // ex
+            _client_logger->info("==========The Client Application is running==========");
+            _client_logger->info(
+                "Client logger initialized with level: {}",
+                _client_config_json.log_level
+            );
 
             _udp_socket = pgw_common::Socket::socket_init(
                 "Client",
@@ -58,7 +63,7 @@ namespace pgw_client
             _client_logger->info("Converting IMSI to BCD...");
             std::vector<uint8_t> imsi_in_bcd = pgw_common::BCDConverter::imsi_to_bcd(_imsi); // ex
             // attempts to send request
-            const int MAX_ATTEMPTS = 3;
+            const int MAX_ATTEMPTS = 10;
             bool send_result = false;
             // try to send
             for (int attempt = 0; attempt < MAX_ATTEMPTS; ++attempt)
@@ -101,7 +106,7 @@ namespace pgw_client
             sockaddr_in copy_serv_addr = server_addr;
             socklen_t cpy_len = sizeof(copy_serv_addr);
             bool got_response = false;
-            const int MAX_SECONDS_TO_WAIT = 5;
+            const int MAX_SECONDS_TO_WAIT = 10;
             // wait response for 5 seconds then 
             auto start = std::chrono::steady_clock::now();
             while ((std::chrono::steady_clock::now() - start) < std::chrono::seconds(MAX_SECONDS_TO_WAIT))
@@ -118,7 +123,8 @@ namespace pgw_client
                 if (number_of_bytes_read < 0) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         // no data
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        _client_logger->warn("No response from the server: {}", strerror(errno));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(900));
                         continue;
                     }
                     else {
@@ -126,6 +132,8 @@ namespace pgw_client
                     }
                 }
                 else {
+                    _client_logger->info("Response from the server has received");
+
                     got_response = true;
                     server_response[number_of_bytes_read] = '\0';
                     break;
@@ -143,11 +151,12 @@ namespace pgw_client
                 _client_logger->warn("Unexpected server response: '{}'", svr_response);
             }
             else {
-                _client_logger->info("Received server response: {}", svr_response);
+                _client_logger->info("Received server response: '{}'", svr_response);
             }
             // end of interaction with the server
             _client_logger->info("The Client has finished interaction with the server");
-        
+
+            _client_logger->info("=====The Client application finished successfully=====");
         } catch(const std::exception& ex) {
             std::string error_message = "Client error: " + std::string(ex.what());
             _client_logger->critical(error_message);
