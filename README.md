@@ -50,6 +50,7 @@ make test
 ```
 
 ## Конфигурация
+```text
 Сервер (configs/pgw_server_cfg.json)
 {
     "udp_ip": "0.0.0.0",
@@ -70,12 +71,13 @@ make test
     "log_file": "client.log",
     "log_level": "INFO"
 }
+```text
 
 ## HTTP API
 
 Проверка статуса абонента
 ```bash
-curl "http://localhost:8080/check_subscriber?imsi=001010000000001"
+curl "http://0.0.0.0:8080/check_subscriber?imsi=001010000000001"
 ```
 Ответ: active или not active
 
@@ -89,7 +91,7 @@ curl "http://0.0.0.0:8080/stop"
 
 ### UDP запрос от клиента
 
-- Формат: IMSI в BCD-кодировке (TS 29.274 §8.3)
+- Формат: IMSI в BCD-кодировке
 - Размер: до 100 байт
 
 ### UDP ответ от сервера
@@ -104,6 +106,8 @@ curl "http://0.0.0.0:8080/stop"
 ```text
 01-12-2024 14:30:25, 001010000000001, session_created
 01-12-2024 14:30:55, 001010000000001, session_timeout
+01-12-2024 14:31:20, 001010000000002, session_created
+01-12-2024 14:31:30, 001010000000002, session_ended
 ```
 
 ## Технологический стек
