@@ -63,7 +63,7 @@ namespace pgw_common
 
     bool BCDConverter::is_valid_imsi(const std::string& imsi)
     {
-        if (imsi.empty()) {
+        if (imsi.empty() || imsi.size() > 15) {
             return false;
         }
         

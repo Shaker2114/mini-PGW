@@ -27,6 +27,8 @@ namespace pgw_common
             _logger->flush_on(getLevelFromString(log_level));
             _logger->set_pattern("[%d-%m-%Y %H:%M:%S] [%n] [%l] %v");
 
+            _logger->debug("Logger object created with name={}", name);
+
             return _logger;
         } catch (const std::bad_alloc& ex) {
             throw std::runtime_error("Failed to create " + name + " logger: " + ex.what());

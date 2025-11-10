@@ -78,7 +78,6 @@ target_include_directories(cpp-httplib-interface INTERFACE
 target_include_directories(pgw_server PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/server
     ${cpp-httplib_SOURCE_DIR}
-    #${googletest_SOURCE_DIR}/googletest/include
 )
 
 target_link_libraries(pgw_server PRIVATE
@@ -101,14 +100,45 @@ target_link_libraries(pgw_client PRIVATE
     pthread
 )
 
-# enable_testing()
+# Tests
+enable_testing()
 
-# add_executable(run_tests tests/test_main.cpp tests/test_example.cpp)
-# target_link_libraries(run_tests PRIVATE
-#     nlohmann_json::nlohmann_json
-#     cpp-httplib
-#     GTest::gtest_main
-# )
+add_executable(pgw_tests
+    src/tests/test_main.cpp
+    src/tests/test_bcdconverter.cpp
+    src/tests/test_config.cpp
+    src/tests/test_logger.cpp
+    src/tests/test_socket.cpp
+    src/tests/test_udpclient.cpp
+    src/tests/test_session.cpp
+    src/tests/test_sessionManager.cpp
+    src/tests/test_cdrwriter.cpp
+    src/tests/test_pgwserver.cpp
+    src/tests/test_udpserver.cpp
+    src/tests/test_httpserver.cpp
+    
+    src/client/UDPClient.cpp
 
-# # Добавляем тесты в CTest
-# add_test(NAME AllTests COMMAND run_tests)
+    src/server/CDRWriter.cpp
+    src/server/Session.cpp
+    src/server/SessionManager.cpp
+    src/server/UDPServer.cpp
+    src/server/HTTPServer.cpp
+    src/server/PGWServer.cpp
+)
+
+target_include_directories(pgw_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/server
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/client
+    ${googletest_SOURCE_DIR}/googletest/include
+    ${cpp-httplib_SOURCE_DIR}
+)
+
+target_link_libraries(pgw_tests PRIVATE
+    pgw_common
+    GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(pgw_tests)

@@ -3,6 +3,7 @@ out/
 bin/
 lib/
 log/
+Testing/
 
 _deps/
 CMakeFiles/
@@ -12,6 +13,7 @@ Makefile
 
 pgw_server
 pgw_client
+pgw_tests
 *.out
 *.log
 
