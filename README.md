@@ -71,7 +71,7 @@ make test
     "log_file": "client.log",
     "log_level": "INFO"
 }
-```text
+```
 
 ## HTTP API
 
